@@ -1,0 +1,7 @@
+[deps]
+Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+MixedModels = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
+MixedModelsMakie = "b12ae82c-6730-437f-aff9-d2c38332a376"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
