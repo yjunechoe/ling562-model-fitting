@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate(".")
+Pkg.status()
 # using MKL
 using Arrow
 using Random
@@ -26,22 +29,25 @@ mod
 coeftable(mod)
 mod.objective
 
-# Plots for parameter estimates (fixed and random effects)
+# Plots for parameter estimates (fixed and random)
 coefplot(mod; show_intercept=false)
-caterpillar(mod)
+caterpillar(mod; vline_at_zero=true)
+## Note on "shrinkage" - a.k.a. "partial-booling", "regularization"
+## - https://www.tjmahr.com/plotting-partial-pooling-in-mixed-effects-models/
 shrinkageplot(mod; ellipse=true)
-## Aside: https://www.youtube.com/watch?v=y6KpCEW88gQ
+## Watch quick video: https://www.youtube.com/watch?v=y6KpCEW88gQ
 
-# Bootstrapped confidence intervals
+# Bootstrapped confidence intervals (better than "robust SE" corrections!)
+# - "Embrace Uncertainty": https://embraceuncertaintybook.com/
 mod_boot = parametricbootstrap(
   MersenneTwister(42), 100, mod;
-  optsum_overrides=(;ftol_rel=1e-8)
+  optsum_overrides=(;ftol_rel=1e-5)
 )
-ridgeplot(mod_boot; show_intercept=false)
 Table(shortestcovint(mod_boot))
+ridgeplot(mod_boot; show_intercept=false)
 
 # Contrasts (see `jlme::jl_formul()` in R)
-contrasts = Dict(
+contrasts_hypothesis_coding = Dict(
     :Condition => HypothesisCoding(
         [
             -1/2 1/2
@@ -50,9 +56,12 @@ contrasts = Dict(
         labels = ["Verb"],
     ),
 );
-mod_v2 = fit(MixedModel, fm, CYC_2022, Bernoulli(); contrasts);
-mod_v2.β
-mod.β
+mod_v2 = fit(
+  MixedModel, fm, CYC_2022, Bernoulli();
+  contrasts = contrasts_hypothesis_coding
+);
+mod_v2
+mod
 
 # Maximal model
 fm_max = @formula(
@@ -65,6 +74,8 @@ dof(mod_max)
 
 # Overfitting diagnostics
 issingular(mod_max)
+shrinkageplot(mod_max, :Item; ellipse=true)
+shrinkageplot(mod_max, :Subject; ellipse=true)
 mod_max.rePCA
 mod.σρs
 MixedModels.likelihoodratiotest(mod, mod_max)
@@ -73,6 +84,7 @@ MixedModels.likelihoodratiotest(mod, mod_max)
 # Performance on PNC data #
 ###########################
 
+# Observational data
 PNC_ay = Arrow.Table("PNC_ay.arrow");
 PNC_fm_max = @formula(
   vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
@@ -113,7 +125,7 @@ ranef_participant[sortperm(ranef_participant.var"allophone: ay0", rev=true)]
 
 # Try with excluding outliers and simplifying formula
 PNC_filtered = filter(
-  r -> r.word != "RIFLES" && row.participant ∉ ["PH91-2-19", "PH80-2-08"],
+  r -> r.word != "RIFLES" && r.participant ∉ ["PH91-2-19", "PH80-2-08"],
   Table(PNC_ay)
 );
 PNC_mod_simple = @time fit(
@@ -147,22 +159,22 @@ mean(simulate(mod))
 
 ## Take this one step further to do a "round-tripping" experiment:
 ## Step 1) From model's params, derive a new param vector
-simmod = deepcopy(mod);
 simβ1 = copy(mod.β);
 simβ1[1] = -2;
 simβ1
 ## Step 2) From new params, simulate a response vector and refit the model
+simmod = deepcopy(mod);
 simulate!(simmod, β = simβ1)
 mean(simmod.resp.y)
 ## Step 3) See if you can recover the inputted params
-fit!(simmod);
+fit!(simmod, fast=true);
 simmod
 
 # Scale up simulate() with parametricbootstrap()
 simboot = parametricbootstrap(
   MersenneTwister(42), 100, mod;
   β = simβ1,
-  optsum_overrides=(;ftol_rel=1e-8)
+  optsum_overrides=(;ftol_rel=1e-5)
 )
 ridgeplot(simboot)
 ridgeplot(mod_boot)
@@ -215,6 +227,7 @@ PNC_sm_boot = parametricbootstrap(
 );
 ridgeplot(PNC_sm_boot; show_intercept=false, vline_at_zero=false)
 
+# Confidence intervals for skewed parameters
 zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
 PNC_sm_boot.tbl.θ1
 
