@@ -1,6 +1,7 @@
 using Pkg
 Pkg.activate(".")
 Pkg.status()
+Pkg.instantiate()
 # using MKL
 using Arrow
 using Random
@@ -227,7 +228,7 @@ PNC_sm_boot = parametricbootstrap(
 );
 ridgeplot(PNC_sm_boot; show_intercept=false, vline_at_zero=false)
 
-# Confidence intervals for skewed parameters
+# CIs for skewed parameters (tends to be true for variance components)
 zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
 PNC_sm_boot.tbl.θ1
 
