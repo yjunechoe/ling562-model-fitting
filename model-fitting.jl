@@ -74,7 +74,6 @@ MixedModels.likelihoodratiotest(mod, mod_max)
 ###########################
 
 PNC_ay = Arrow.Table("PNC_ay.arrow");
-PNC_ay_tbl = Table(PNC_ay)
 PNC_fm_max = @formula(
   vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
                 (1 + allophone + logdur_z2 + frequency_z2 | participant) +
@@ -98,8 +97,8 @@ shrinkageplot(PNC_mod_max, :word; ellipse=true)
 function uncond_raneftables(m::LinearMixedModel)
   m_uncond = deepcopy(m);
   m_uncond.θ = m.optsum.initial .* 1e4;
-  updateL!(PNC_mod_max_uncond)
-  raneftables(PNC_mod_max_uncond)
+  updateL!(m_uncond)
+  raneftables(m_uncond)
 end ;
 ranef_uncond = uncond_raneftables(PNC_mod_max);
 
@@ -114,7 +113,7 @@ ranef_participant[sortperm(ranef_participant.var"allophone: ay0", rev=true)]
 
 # Try with excluding outliers and simplifying formula
 PNC_filtered = filter(
-  row -> row.word != "RIFLES" && row.participant ∉ ["PH91-2-19", "PH80-2-08"],
+  r -> r.word != "RIFLES" && row.participant ∉ ["PH91-2-19", "PH80-2-08"],
   Table(PNC_ay)
 );
 PNC_mod_simple = @time fit(
@@ -138,14 +137,12 @@ shrinkageplot(PNC_mod_simple, :word; ellipse=true, cols = ["birthyear_z2", "logd
 # Counterfactuals #
 ###################
 
-mod
-
-## Models store the response vector 
+# Models store the response vector 
 CYC_2022.Accuracy
 mod.resp.y
 mean(mod.resp.y)
 
-## New response vector can be simulated from model's existing params
+# New response vector can be simulated from model's existing params
 mean(simulate(mod))
 
 ## Take this one step further to do a "round-tripping" experiment:
@@ -161,7 +158,7 @@ mean(simmod.resp.y)
 fit!(simmod);
 simmod
 
-## Scale up simulate() with parametricbootstrap()
+# Scale up simulate() with parametricbootstrap()
 simboot = parametricbootstrap(
   MersenneTwister(42), 100, mod;
   β = simβ1,
@@ -170,21 +167,56 @@ simboot = parametricbootstrap(
 ridgeplot(simboot)
 ridgeplot(mod_boot)
 
-## Other experiments:
+# Other experiments with parametricbootstrap():
 mod
 ## - Triple the contribution of random effects
 ridgeplot(parametricbootstrap(
   MersenneTwister(42), 100, mod;
   θ = mod.θ .* 3,
-  optsum_overrides=(;ftol_rel=1e-8)
+  optsum_overrides=(;ftol_rel=1e-5)
 ); show_intercept=false)
 ## - Using half of the data
 size(Table(CYC_2022), 1) ÷ 2
 mod_half = fit(MixedModel, fm, Table(CYC_2022)[1:706], Bernoulli())
 ridgeplot(parametricbootstrap(
   MersenneTwister(42), 100, mod_half;
-  optsum_overrides=(;ftol_rel=1e-8)
+  optsum_overrides=(;ftol_rel=1e-5)
 ); show_intercept=false)
+
+
+# In a similar vein, take a significant term and ask about its variability
+PNC_sm = fit(
+  MixedModel,
+  @formula(
+    vheight ~ allophone + zerocorr(1 + allophone | participant)
+  ),
+  Table(PNC_ay)[1:1000]
+);
+PNC_sm
+PNC_sm.β[2]
+coefplot(PNC_sm; show_intercept=false)
+
+## Technical term for this test of uncertainty is "profiling the log likelihood"
+# - Take the model with optimal fit and compare to a copy that deviates in value of β
+# - At what point of deviation in the β value does model fit get significantly worse?
+# -- Try values of β and compute a difference in fit called ζ, for a ±threshold range of ζ
+# --- ** ζ is ±√deviance and normally distributed, so |ζ|>2 is significantly worse fit
+PNC_sm_prof = profile(PNC_sm; threshold = 3);
+PNC_sm_prof
+filter(r -> r.p == :β2, PNC_sm_prof.tbl)
+confint(PNC_sm_prof)
+zetaplot(PNC_sm_prof; absv=true)
+profiledensity(PNC_sm_prof; ptyp='β')
+
+# Compare to bootstrap
+PNC_sm_boot = parametricbootstrap(
+  MersenneTwister(42), 1000, PNC_sm;
+  optsum_overrides=(;ftol_rel=1e-5)
+);
+ridgeplot(PNC_sm_boot; show_intercept=false, vline_at_zero=false)
+
+zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
+PNC_sm_boot.tbl.θ1
 
 #################
 # Miscellaneous #
