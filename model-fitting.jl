@@ -40,14 +40,16 @@ shrinkageplot(mod; ellipse=true)
 
 # Bootstrapped confidence intervals (better than "robust SE" corrections!)
 # - "Embrace Uncertainty": https://embraceuncertaintybook.com/
+# - See also GLMM FAQ: https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#model-diagnostics
 mod_boot = parametricbootstrap(
   MersenneTwister(42), 100, mod;
   optsum_overrides=(;ftol_rel=1e-5)
 )
-Table(shortestcovint(mod_boot))
 ridgeplot(mod_boot; show_intercept=false)
+Table(shortestcovint(mod_boot))
 
-# Contrasts (see `jlme::jl_formul()` in R)
+# Contrasts (see `jlme::jl_formula()` in R)
+# - Julia likes to use "hypothesis matrix" (see Schad, Vasishth, Hohenstein, & Kliegl 2020)
 contrasts_hypothesis_coding = Dict(
     :Condition => HypothesisCoding(
         [
@@ -70,7 +72,7 @@ fm_max = @formula(
     + (1 + Condition | Item)
     + (1 + Condition * SemanticFit * Transitivity | Subject)
 );
-mod_max = fit(MixedModel, fm_max, CYC_2022, Bernoulli());
+mod_max = @time fit(MixedModel, fm_max, CYC_2022, Bernoulli());
 dof(mod_max)
 
 # Overfitting diagnostics
@@ -197,7 +199,7 @@ ridgeplot(parametricbootstrap(
 ); show_intercept=false)
 
 
-# In a similar vein, take a significant term and ask about its variability
+# In a similar vein, take a significant term and tweak its values to test durability
 PNC_sm = fit(
   MixedModel,
   @formula(
@@ -226,11 +228,12 @@ PNC_sm_boot = parametricbootstrap(
   MersenneTwister(42), 1000, PNC_sm;
   optsum_overrides=(;ftol_rel=1e-5)
 );
+confint(PNC_sm_boot)
 ridgeplot(PNC_sm_boot; show_intercept=false, vline_at_zero=false)
 
-# CIs for skewed parameters (tends to be true for variance components)
-zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
+# Good CIs for skewed distributions (tends to be true for variance components)
 PNC_sm_boot.tbl.θ1
+zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
 
 #################
 # Miscellaneous #
