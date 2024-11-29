@@ -1,7 +1,12 @@
 library(lme4)
 library(arrow)
+
 CYC_2022 <- read_feather("CYC_2022.arrow")
-head(CYC_2022)
+dim(CYC_2022)
+
+# "While Anna dressed the baby stopped crying."
+CYC_2022 |>
+  subset(Item == "Dressed")
 
 # Convergence failure: is this a false positive?
 fm <- Accuracy ~ Condition * SemanticFit * Transitivity +
@@ -11,15 +16,21 @@ fm <- Accuracy ~ Condition * SemanticFit * Transitivity +
 mod1 <- glmer(fm, CYC_2022, binomial())
 summary(mod1)
 
+# Some slides on convergence: https://rpubs.com/palday/lme4-singular-convergence
+# Also: https://stats.stackexchange.com/questions/384528/lme-and-lmer-giving-conflicting-results/
+
+# Information of interest
 mod1@optinfo$optimizer
 mod1@optinfo$feval
 mod1@optinfo$conv
 -2 * as.numeric(logLik(mod1))
 
+# Descriptions of optimizer options (see also `?convergence`)
+lobstr::tree(glmerControl()) # Also: `lmerControl()`
+unname(unstack(nloptr::nloptr.get.default.options()[, c("description", "name")]))
+
 # Turn it off approach:
-lobstr::tree(
-  glmerControl()
-)
+# - https://github.com/RePsychLing/SMLP2023/discussions/24
 
 ## 1) more lenient tol for gradient
 mod2 <- glmer(
@@ -85,13 +96,10 @@ c(mod6@beta, mod6@theta) - c(mod5@beta, mod5@theta)
 # Misc: reading `verbose = TRUE` output
 mod_debug <- glmer(
   fm, CYC_2022, binomial(),
-  control = glmerControl(optimizer = "bobyqa"),
+  control = glmerControl(),
   verbose = TRUE # c(theta, beta)
 )
 mod_debug@optinfo$feval
-
-# Misc: descriptions of optimizer options (see also `?convergence`)
-unname(unstack(nloptr::nloptr.get.default.options()[, c("description", "name")]))
 
 # Julia goes brrr
 library(jlme)
@@ -123,3 +131,4 @@ tidy(jmod) |>
   subset(term == "ConditionVerb")
 
 jl_contrasts(CYC_2022_v2, cols = "Condition", show_code = TRUE)
+MASS::ginv(contrasts(CYC_2022_v2$Condition))
