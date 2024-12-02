@@ -23,10 +23,11 @@ For best experience running Julia scripts from RStudio, go to `Tools > Modify Ke
 ```
 
 > [!IMPORTANT]  
-> `PNC_ay.arrow` is a derivative of the Philadelphia Neighborhood Corpus data and must be copied into the repo separately. Instructions on this will be delivered in class.
+> `PNC_ay.arrow` is a derivative of the Philadelphia Neighborhood Corpus data (not distributable by me) and must be copied into the repo separately. Instructions on this will be delivered in class.
 
 ## See also
 
-- My prior [guest lecture](https://github.com/yjunechoe/ling5620-julia-demo) on MixedModels.jl
-- MixedModels.jl [documentation website](https://juliastats.org/MixedModels.jl/stable/)
+- My prior [workshop](https://colab.research.google.com/drive/1eT-cb3_TAczLvs29_XpRH49oaySM4zW0?usp=sharing) and [guest lecture](https://github.com/yjunechoe/ling5620-julia-demo) on MixedModels.jl
+- MixedModels.jl [documentation website](https://juliastats.org/MixedModels.jl/stable/) (see also [MixedModelsExtras.jl](https://palday.github.io/MixedModelsExtras.jl/stable/), [MixedModelsMakie.jl](https://palday.github.io/MixedModelsMakie.jl/stable/), [MixedModelsSim.jl](https://repsychling.github.io/MixedModelsSim.jl/stable/), [Effects.jl](https://beacon-biosignals.github.io/Effects.jl/stable/), etc.)
 - Embrace Uncertainty [book](https://embraceuncertaintybook.com/)
+- SMLP [workshop](https://repsychling.github.io/SMLP2024/) (I attended the [2023](https://repsychling.github.io/SMLP2023/) iteration)
