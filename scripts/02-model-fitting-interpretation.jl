@@ -16,7 +16,7 @@ using MixedModelsMakie
 ###############################
 
 # Continuing from R script
-CYC_2022 = Arrow.Table("CYC_2022.arrow");
+CYC_2022 = Arrow.Table("data/CYC_2022.arrow");
 Table(CYC_2022)
 
 fm = @formula(
@@ -90,7 +90,7 @@ MixedModels.likelihoodratiotest(mod, mod_max)
 ###########################
 
 # Observational data
-PNC_ay = Arrow.Table("PNC_ay.arrow");
+PNC_ay = Arrow.Table("data/PNC_ay.arrow");
 Table(PNC_ay)
 PNC_fm_max = @formula(
   vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +

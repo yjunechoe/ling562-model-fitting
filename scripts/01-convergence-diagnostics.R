@@ -1,7 +1,7 @@
 library(lme4)
 library(arrow)
 
-CYC_2022 <- read_feather("CYC_2022.arrow")
+CYC_2022 <- read_feather("data/CYC_2022.arrow")
 dim(CYC_2022)
 
 # "While Anna dressed the baby stopped crying."
