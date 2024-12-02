@@ -1,6 +1,6 @@
 # Non-convergence and overparameterization in mixed-effects models: strategies in R and Julia
 
-Guest lecture. December 4, 2024.
+LING 5670 guest lecture. December 4, 2024. University of Pennsylvania.
 
 ## Instructions
 
@@ -15,11 +15,11 @@ For best experience running Julia scripts from RStudio, go to `Tools > Modify Ke
 ├── data
 │   ├── CYC_2022.arrow
 │   └── PNC_ay.arrow
+├── scripts
+│   ├── 01-convergence-diagnostics.R
+│   └── 02-model-fitting-interpretation.jl
 ├── Project.toml
-├── ...
-└── scripts
-    ├── 01-convergence-diagnostics.R
-    └── 02-model-fitting-interpretation.jl
+└── ...
 ```
 
 > [!IMPORTANT]  
