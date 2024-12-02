@@ -1,6 +1,6 @@
 # Non-convergence and overparameterization in mixed-effects models: strategies in R and Julia
 
-LING 5670 guest lecture. December 4, 2024. University of Pennsylvania.
+LING 5620 guest lecture. December 4, 2024. University of Pennsylvania.
 
 ## Instructions
 
