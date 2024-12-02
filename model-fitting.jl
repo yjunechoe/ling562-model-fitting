@@ -1,8 +1,9 @@
 using Pkg
 Pkg.activate(".")
 Pkg.status()
-Pkg.instantiate()
 # using MKL
+
+Pkg.instantiate()
 using Arrow
 using Random
 using Statistics
@@ -27,7 +28,7 @@ fm = @formula(
 #     jlmer(fm, CYC_2022, binomial())
 mod = fit(MixedModel, fm, CYC_2022, Bernoulli());
 mod
-coeftable(mod)
+Table(coeftable(mod))
 mod.objective
 
 # Plots for parameter estimates (fixed and random)
@@ -73,6 +74,7 @@ fm_max = @formula(
     + (1 + Condition * SemanticFit * Transitivity | Subject)
 );
 mod_max = @time fit(MixedModel, fm_max, CYC_2022, Bernoulli());
+mod_max
 dof(mod_max)
 
 # Overfitting diagnostics
@@ -89,6 +91,7 @@ MixedModels.likelihoodratiotest(mod, mod_max)
 
 # Observational data
 PNC_ay = Arrow.Table("PNC_ay.arrow");
+Table(PNC_ay)
 PNC_fm_max = @formula(
   vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
                 (1 + allophone + logdur_z2 + frequency_z2 | participant) +
@@ -147,6 +150,7 @@ issingular(PNC_mod_simple)
 shrinkageplot(PNC_mod_simple, :participant; ellipse=true)
 shrinkageplot(PNC_mod_simple, :word; ellipse=true)
 shrinkageplot(PNC_mod_simple, :word; ellipse=true, cols = ["birthyear_z2", "logdur_z2"])
+shrinkageplot(PNC_mod_max, :word; ellipse=true, cols = ["birthyear_z2", "logdur_z2"])
 
 ###################
 # Counterfactuals #
@@ -171,7 +175,8 @@ simulate!(simmod, β = simβ1)
 mean(simmod.resp.y)
 ## Step 3) See if you can recover the inputted params
 fit!(simmod, fast=true);
-simmod
+# simmod
+simmod.β[1]
 
 # Scale up simulate() with parametricbootstrap()
 simboot = parametricbootstrap(
@@ -205,7 +210,7 @@ PNC_sm = fit(
   @formula(
     vheight ~ allophone + zerocorr(1 + allophone | participant)
   ),
-  Table(PNC_ay)[1:1000]
+  Table(PNC_ay)[1:1000] # For demo, use a subset of data
 );
 PNC_sm
 PNC_sm.β[2]
@@ -231,8 +236,13 @@ PNC_sm_boot = parametricbootstrap(
 confint(PNC_sm_boot)
 ridgeplot(PNC_sm_boot; show_intercept=false, vline_at_zero=false)
 
-# Good CIs for skewed distributions (tends to be true for variance components)
+# In the case of skewed distributions (often variance components)
+PNC_sm.θ[1]
+## Bootstrapped distribution suffer from statistical artifacts (inflates 0s)
 PNC_sm_boot.tbl.θ1
+sum(x -> x ≈ 0, PNC_sm_boot.tbl.θ1)
+density(PNC_sm_boot.tbl.θ1; bandwidth = .01)
+## Deterministically computed profiling avoids this problem at the boundary
 zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
 
 #################
@@ -246,4 +256,4 @@ zetaplot(PNC_sm_prof; absv=true, ptyp='θ')
 ##   - "I want to detect a size at least as big as..."
 ## - Specify expected degree of noise (random effects)
 ##   - "The signal to noise ratio is ..."
-# For example, see: https://repsychling.github.io/MixedModelsSim.jl/stable/simulation_tutorial/
+# See tutorial: https://repsychling.github.io/MixedModelsSim.jl/stable/simulation_tutorial/

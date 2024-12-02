@@ -102,7 +102,7 @@ mod_debug <- glmer(
 mod_debug@optinfo$feval
 
 # Julia goes brrr
-library(jlme)
+library(jlme) # install.packages("jlme")
 jlme_setup()
 jmod <- jlmer(fm, CYC_2022, binomial())
 jmod$objective
