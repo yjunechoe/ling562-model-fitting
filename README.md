@@ -23,7 +23,7 @@ For best experience running Julia scripts from RStudio, go to `Tools > Modify Ke
 ```
 
 > [!IMPORTANT]  
-> `PNC_ay.arrow` is a derivative of the Philadelphia Neighborhood Corpus data (not distributable by me) and must be copied into the repo separately. Instructions on this will be delivered in class.
+> `PNC_ay.arrow` is a derivative of the Philadelphia Neighborhood Corpus data (not distributable by me) and must be copied into the repo separately. You can find it in the dropbox folder for class datasets.
 
 ## See also
 
