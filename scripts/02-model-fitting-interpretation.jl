@@ -1,9 +1,8 @@
 using Pkg
 Pkg.activate(".")
 Pkg.status()
-# using MKL
 
-Pkg.instantiate()
+# using MKL
 using Arrow
 using Random
 using Statistics
