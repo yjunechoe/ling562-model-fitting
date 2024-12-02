@@ -4,7 +4,7 @@ Guest lecture. December 4, 2024.
 
 ## Instructions
 
-Scripts are to be ran in the order of `convergence-diagnostics.R` then `model-fitting.jl`.
+Scripts are to be ran in the order of `01-convergence-diagnostics.R` then `02-model-fitting-interpretation.jl`.
 
 For best experience running Julia scripts from RStudio, go to `Tools > Modify Keyboard Shortcuts` and bind the command `Send Selection to Terminal` (I use <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd>).
 
@@ -12,12 +12,14 @@ For best experience running Julia scripts from RStudio, go to `Tools > Modify Ke
 
 ```
 .
-├── convergence-diagnostics.R
-├── CYC_2022.arrow
-├── model-fitting.jl
-├── PNC_ay.arrow
+├── data
+│   ├── CYC_2022.arrow
+│   └── PNC_ay.arrow
 ├── Project.toml
-└── ...
+├── ...
+└── scripts
+    ├── 01-convergence-diagnostics.R
+    └── 02-model-fitting-interpretation.jl
 ```
 
 > [!IMPORTANT]  
