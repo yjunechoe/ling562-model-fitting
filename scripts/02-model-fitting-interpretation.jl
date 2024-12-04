@@ -21,7 +21,7 @@ Table(CYC_2022)
 fm = @formula(
   Accuracy ~ Condition * SemanticFit * Transitivity +
     (1 | Item) +
-    (1 + Condition | Subject)
+    (1 + Condition | Subject) # Note: a fun case of when *adding* corr resolves singular fit
 );
 
 #     jlmer(fm, CYC_2022, binomial())
@@ -29,6 +29,8 @@ mod = fit(MixedModel, fm, CYC_2022, Bernoulli());
 mod
 Table(coeftable(mod))
 mod.objective
+# See: https://juliastats.org/MixedModels.jl/stable/api/#MixedModels.OptSummary
+mod.optsum
 
 # Plots for parameter estimates (fixed and random)
 coefplot(mod; show_intercept=false)
